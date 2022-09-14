@@ -1,9 +1,10 @@
 #! /usr/bin/bash
 
-while getopts p:h:d flag
+while getopts p:k:h:d flag
 do
     case "$flag" in
-        p) publicKey=${{OPTARG}};;
+        p) projectName=${{OPTARG}};;
+        k) publicKey=${{OPTARG}};;
         h) hostName=${OPTARG};;
         d) docker=True;;
     esac

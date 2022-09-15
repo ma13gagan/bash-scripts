@@ -149,7 +149,7 @@ echo "$htmlFile" > /home/ubuntu/index.html
 
 sudo nginx -t
 
-sudo certbot --nginx -d $hostName --non-interactive --agree-tos
+sudo certbot --nginx -d $hostName --agree-tos --email admin@example.com
 
 rm /home/ubuntu/index.html
 

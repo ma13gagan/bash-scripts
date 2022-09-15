@@ -1,6 +1,6 @@
 # Bash Scripts Usage Docs
 
-## How to use server-setup.sh script
+## 1. server-setup.sh script
 
 Download the script
 
@@ -11,7 +11,7 @@ curl -o script.sh https://raw.githubusercontent.com/ma13gagan/bash-scripts/main/
 Script usage
 
 ```sh
-./script.sh -p <project name> -k <public key> -h <host name> -d
+sudo ./script.sh -p <project name> -k <public key> -h <host name> -d
 ```
 
 > -d is the optional flag for installing docker

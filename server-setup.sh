@@ -72,7 +72,7 @@ sudo sed -i 's:AuthorizedKeysFile\t.ssh/authorized_keys:AuthorizedKeysFile\t.ssh
 
 serverFile=$( cat <<EOF
 server {
-    root /home/ubuntu
+    root /home/ubuntu;
     # root /home/ubuntu/$projectName/build;
     index index.html index.htm index.nginx-debian.html;
     

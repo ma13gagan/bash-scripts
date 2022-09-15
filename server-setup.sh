@@ -53,27 +53,28 @@ sudo apt install certbot python3-certbot-nginx -y
 print_messages "Nginx setup completed"
 
 # Installing Docker
-if [[ docker == True ]]
+if [[ $docker == True ]]
 then
     sudo apt install apt-transport-https ca-certificates curl software-properties-common
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
     sudo apt update
     apt-cache policy docker-ce
-    sudo apt install docker-ce
+    sudo apt install docker-ce -y
     mkdir -p ~/.docker/cli-plugins/
     curl -SL https://github.com/docker/compose/releases/download/v2.3.3/docker-compose-linux-x86_64 -o ~/.docker/cli-plugins/docker-compose
     chmod +x ~/.docker/cli-plugins/docker-compose
 fi
 
 # authorized_keys2 Setup
-echo "$publicKey" > ~/.ssh/authorized_keys2
+echo "$publicKey" > /tmp/authorized_keys2
+sudo cp -r /tmp/authorized_keys2 ~/.ssh/
 sudo sed -i 's:AuthorizedKeysFile\t.ssh/authorized_keys:AuthorizedKeysFile\t.ssh/authorized_keys\t.ssh/authorized_keys2:' /etc/ssh/sshd_config
 
 serverFile=$( cat <<EOF
 server {
-    root /home/ubuntu;
-    # root /home/ubuntu/$projectName/build;
+    root ~/;
+    # root ~/$projectName/build;
     index index.html index.htm index.nginx-debian.html;
     
     server_name $hostName;
@@ -121,7 +122,7 @@ server {
     
     #For static files
     # location /static {
-    #     alias /home/ubuntu/$projectName/build/static/;
+    #     alias ~/$projectName/build/static/;
     #     expires 1y;
     #     add_header Cache-Control "public";
     #     access_log off;
@@ -145,17 +146,18 @@ htmlFile=$( cat <<EOF
 EOF
 )
 
-echo "$htmlFile" > /home/ubuntu/index.html
+echo "$htmlFile" > ~/index.html
 
 sudo nginx -t
 
-sudo certbot --nginx -d $hostName --agree-tos --email admin@example.com
+sudo certbot --nginx -d $hostName --agree-tos --register-unsafely-without-email
 
-rm /home/ubuntu/index.html
+rm ~/index.html
 
 sudo sed -i '/root \/home\/ubuntu/d' /etc/nginx/sites-available/$hostName
 sudo sed -i 's:index index.html index.htm index.nginx-debian.html;:# index index.html index.htm index.nginx-debian.html;:' /etc/nginx/sites-available/$hostName
 
-mkdir temp $projectName
+rm -r ~/temp ~/$projectName
+mkdir ~/temp ~/$projectName
 
 print_messages "Whole Server Setup Completed! Enjoy!!!" 2

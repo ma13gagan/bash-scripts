@@ -1,27 +1,56 @@
 #! /usr/bin/bash
 
+print_messages(){
+    if [[ $2 -gt 0 ]]
+    then
+        textColor=$2
+    else
+        textColor=4
+    fi
+
+    echo "$(tput setaf $textColor)##############################
+        $1
+##############################"
+}
+
+# Exit when any command fails
+set -e
+
+# Keep track of the last executed command
+trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
+# Echo an error message before exiting
+trap 'print_messages "\"${last_command}\" command failed with exit code $?." 1' EXIT
+
 while getopts p:k:h:d flag
 do
     case "$flag" in
-        p) projectName=${{OPTARG}};;
-        k) publicKey=${{OPTARG}};;
+        p) projectName=${OPTARG};;
+        k) publicKey=${OPTARG};;
         h) hostName=${OPTARG};;
         d) docker=True;;
     esac
 done
 
+# Initial server setup
+sudo apt update
+sudo apt install curl zip unzip -y
+print_messages "Initial server setup completed"
+
 # Installing Nodejs
 sudo apt update
 curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
 sudo apt-get install -y nodejs
+print_messages "Nodejs installed"
 
 # Installing global node packages
 sudo npm i -g pm2 yarn typescript
+print_messages "Global packages installed"
 
 # Installing and setup Nginx
-sudo apt install nginx
+sudo apt install nginx -y
 sudo systemctl restart nginx
-sudo apt install certbot python3-certbot-nginx
+sudo apt install certbot python3-certbot-nginx -y
+print_messages "Nginx setup completed"
 
 # Installing Docker
 if [[ docker == True ]]
@@ -38,7 +67,7 @@ then
 fi
 
 # authorized_keys2 Setup
-ehco "$publicKey" > ~/.ssh/authorized_keys2
+echo "$publicKey" > ~/.ssh/authorized_keys2
 sudo sed -i 's:AuthorizedKeysFile\t.ssh/authorized_keys:AuthorizedKeysFile\t.ssh/authorized_keys\t.ssh/authorized_keys2:' /etc/ssh/sshd_config
 
 serverFile=$( cat <<EOF
@@ -101,7 +130,8 @@ server {
 EOF
 )
 
-sudo echo "$serverFile" > /etc/nginx/sites-available/$hostName
+echo "$serverFile" > /tmp/$hostName
+sudo cp -r /tmp/$hostName /etc/nginx/sites-available/
 sudo ln -s /etc/nginx/sites-available/$hostName /etc/nginx/sites-enabled/
 
 htmlFile=$( cat <<EOF
@@ -115,12 +145,17 @@ htmlFile=$( cat <<EOF
 EOF
 )
 
-echo "$htmlFile" > index.html
+echo "$htmlFile" > /home/ubuntu/index.html
+
+sudo nginx -t
 
 sudo certbot --nginx -d $hostName --non-interactive --agree-tos
 
-rm index.html
+rm /home/ubuntu/index.html
 
-sudo sed -i 's:root /home/ubuntu::' /etc/nginx/sites-available/$hostName
+sudo sed -i '/root \/home\/ubuntu/d' /etc/nginx/sites-available/$hostName
+sudo sed -i 's:index index.html index.htm index.nginx-debian.html;:# index index.html index.htm index.nginx-debian.html;:' /etc/nginx/sites-available/$hostName
 
 mkdir temp $projectName
+
+print_messages "Whole Server Setup Completed! Enjoy!!!" 2

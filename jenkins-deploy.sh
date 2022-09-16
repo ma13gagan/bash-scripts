@@ -1,25 +1,12 @@
 #! /usr/bin/bash
 
-print_messages(){
-    if [[ $2 -gt 0 ]]
-    then
-        textColor=$2
-    else
-        textColor=4
-    fi
-
-    echo "$(tput setaf $textColor)##############################
-        $1
-##############################"
-}
-
 # Exit when any command fails
 set -e
 
 # Keep track of the last executed command
 trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
 # Echo an error message before exiting
-trap 'print_messages "\"${last_command}\" command failed with exit code $?." 1' EXIT
+trap '"\"${last_command}\" command failed with exit code $?." 1' EXIT
 
 while getopts h:p:ts flag
 do

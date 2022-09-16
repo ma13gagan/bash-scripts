@@ -34,7 +34,6 @@ done
 cd /var/lib/jenkins/projects/$projectName
 git pull
 git checkout master
-print_messages "Pull Completed"
 
 cd ../
 zip -r $projectName.zip $projectName/ -x "$projectName/.git/*"

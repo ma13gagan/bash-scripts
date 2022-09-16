@@ -70,7 +70,7 @@ fi
 # authorized_keys2 Setup
 echo "$publicKey" > /tmp/authorized_keys2
 mv /tmp/authorized_keys2 ~/.ssh/
-sudo sed -i 's/.*AuthorizedKeysFile\t.ssh\/authorized_keys.*/AuthorizedKeysFile\t.ssh\/authorized_keys\t.ssh\/authorized_keys2' /etc/ssh/sshd_config
+sudo sed -i 's/.*AuthorizedKeysFile\t.ssh\/authorized_keys.*/AuthorizedKeysFile\t.ssh\/authorized_keys\t.ssh\/authorized_keys2/' /etc/ssh/sshd_config
 print_messages "SSH setup completed"
 
 serverFile=$( cat <<EOF

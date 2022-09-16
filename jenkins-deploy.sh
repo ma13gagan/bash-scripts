@@ -1,12 +1,25 @@
 #! /usr/bin/bash
 
+print_messages(){
+    if [[ $2 -gt 0 ]]
+    then
+        textColor=$2
+    else
+        textColor=4
+    fi
+
+    echo "$(tput setaf $textColor)##############################
+        $1
+##############################"
+}
+
 # Exit when any command fails
 set -e
 
 # Keep track of the last executed command
 trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
 # Echo an error message before exiting
-trap 'echo "\"${last_command}\" command failed with exit code $?."' EXIT
+trap 'print_messages "\"${last_command}\" command failed with exit code $?." 1' EXIT
 
 while getopts h:p:ts flag
 do
@@ -21,9 +34,13 @@ done
 cd /var/lib/jenkins/projects/$projectName
 git pull
 git checkout master
+print_messages "Pull Completed"
+
 cd ../
 zip -r $projectName.zip $projectName/ -x "$projectName/.git/*"
 scp -r $projectName.zip $host:/home/ubuntu/temp
+print_messages "Secure copy completed to host"
+
 ssh $host << EOF
 unzip -o temp/$projectName.zip -d temp/
 if [[ $server == True ]]

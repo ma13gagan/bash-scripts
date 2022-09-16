@@ -64,12 +64,14 @@ then
     mkdir -p ~/.docker/cli-plugins/
     curl -SL https://github.com/docker/compose/releases/download/v2.3.3/docker-compose-linux-x86_64 -o ~/.docker/cli-plugins/docker-compose
     chmod +x ~/.docker/cli-plugins/docker-compose
+    print_messages "Doccker setup completed"
 fi
 
 # authorized_keys2 Setup
 echo "$publicKey" > /tmp/authorized_keys2
-sudo cp -r /tmp/authorized_keys2 ~/.ssh/
-sudo sed -i 's:AuthorizedKeysFile\t.ssh/authorized_keys:AuthorizedKeysFile\t.ssh/authorized_keys\t.ssh/authorized_keys2:' /etc/ssh/sshd_config
+mv /tmp/authorized_keys2 ~/.ssh/
+sudo sed -i 's/.*AuthorizedKeysFile\t.ssh\/authorized_keys.*/AuthorizedKeysFile\t.ssh\/authorized_keys\t.ssh\/authorized_keys2' /etc/ssh/sshd_config
+print_messages "SSH setup completed"
 
 serverFile=$( cat <<EOF
 server {
@@ -132,7 +134,7 @@ EOF
 )
 
 echo "$serverFile" > /tmp/$hostName
-sudo cp -r /tmp/$hostName /etc/nginx/sites-available/
+sudo mv /tmp/$hostName /etc/nginx/sites-available/
 sudo ln -s /etc/nginx/sites-available/$hostName /etc/nginx/sites-enabled/
 
 htmlFile=$( cat <<EOF
@@ -156,8 +158,8 @@ rm ~/index.html
 
 sudo sed -i '/root \/home\/ubuntu/d' /etc/nginx/sites-available/$hostName
 sudo sed -i 's:index index.html index.htm index.nginx-debian.html;:# index index.html index.htm index.nginx-debian.html;:' /etc/nginx/sites-available/$hostName
+print_messages "SSL setup completed"
 
-rm -r ~/temp ~/$projectName
 mkdir ~/temp ~/$projectName
 
 print_messages "Whole Server Setup Completed! Enjoy!!!" 2

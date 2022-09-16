@@ -31,6 +31,7 @@ unzip -o temp/$projectName.zip -d temp/
 if [[ $server == True ]]
 then
     cp -r temp/$projectName ./
+    cp -r env.$projectName $projectName/.env
     cd $projectName
     yarn install
     if [[ $typescript == True ]]
@@ -41,6 +42,7 @@ then
     pm2 restart all
 else
     cd temp/$projectName
+    cp -r env.$projectName temp/$projectName/.env
     yarn install
     yarn build
     cp -r build ../../$projectName

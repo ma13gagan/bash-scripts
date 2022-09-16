@@ -38,8 +38,7 @@ print_messages "Pull Completed"
 
 cd ../
 zip -r $projectName.zip $projectName/ -x "$projectName/.git/*"
-scp -r $projectName.zip $host:/home/ubuntu/temp
-print_messages "Secure copy completed to host"
+scp -r $projectName.zip $host:~/temp
 
 ssh $host << EOF
 unzip -o temp/$projectName.zip -d temp/

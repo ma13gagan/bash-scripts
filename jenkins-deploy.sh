@@ -1,37 +1,35 @@
 #! /usr/bin/bash
 
-# Exit when any command fails
 set -e
 
-# Keep track of the last executed command
-trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
-# Echo an error message before exiting
-trap '"\"${last_command}\" command failed with exit code $?." 1' EXIT
+server=False
+branch="master"
 
-while getopts h:p:ts flag
+while getopts h:p:e:s:b:t flag
 do
     case "$flag" in
         h) host=${OPTARG};;
         p) projectName=${OPTARG};;
+        e) envFile=${OPTARG};;
+        s) serverType=${OPTARG};;
+        b) branch=${OPTARG};;
         t) typescript=True;;
-        s) server=True
     esac
 done
 
 cd /var/lib/jenkins/projects/$projectName
 git pull
-git checkout master
+git checkout $branch
 
-cd ../
-zip -r $projectName.zip $projectName/ -x "$projectName/.git/*"
-scp -r $projectName.zip $host:~/temp
-
-ssh $host << EOF
-unzip -o temp/$projectName.zip -d temp/
-if [[ $server == True ]]
+if [[ $serverType == "node" ]]
 then
-    cp -r temp/$projectName ./
-    cp -r env.$projectName $projectName/.env
+    cp -r ../$envFile ./.env
+    cd ../
+    zip -r $projectName.zip $projectName/ -x "$projectName/.git/*"
+    scp -r $projectName.zip $host:~/temp
+
+    ssh $host << EOF
+    unzip -o temp/$projectName.zip -d ./
     cd $projectName
     yarn install
     if [[ $typescript == True ]]
@@ -40,12 +38,19 @@ then
         cp .env build/
     fi
     pm2 restart all
-else
-    cd temp/$projectName
-    cp -r env.$projectName temp/$projectName/.env
-    yarn install
-    yarn build
-    cp -r build ../../$projectName
-fi
-exit
+    exit
 EOF
+elif [[ $serverType == 'react' ]]
+then
+    cp -r ../$envFile ./.env
+    yarn install
+    rm -r build
+    yarn build
+    zip -r build.zip build
+    scp -r build.zip $host:~/temp
+    ssh $host << EOF
+    unzip -o temp/build.zip -d temp/
+    cp -r temp/build $projectName/
+    exit
+EOF
+fi

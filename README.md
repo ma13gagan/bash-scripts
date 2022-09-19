@@ -27,7 +27,7 @@ curl -o script.sh https://raw.githubusercontent.com/ma13gagan/bash-scripts/main/
 Script usage
 
 ```sh
-./script.sh -p <project name> -h <host name> -t -s
+./script.sh -h <host name> -p <project name> -e <env file> -s <node | react> -b <branch name> -t
 ```
 
 > -t is the optional flag for typescript

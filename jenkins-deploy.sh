@@ -25,6 +25,13 @@ if [[ $serverType == "node" ]]
 then
     cp -r ../$envFile ./.env
     cd ../
+    if [[ $typescript == True ]]
+    then
+        yarn install
+        yarn build
+        cp .env build/
+        rm -r -f node_modules
+    fi
     zip -r $projectName.zip $projectName/ -x "$projectName/.git/*"
     scp -r $projectName.zip $host:~/temp
 
@@ -32,11 +39,6 @@ then
     unzip -o temp/$projectName.zip -d ./
     cd $projectName
     yarn install
-    if [[ $typescript == True ]]
-    then
-        yarn build
-        cp .env build/
-    fi
     pm2 restart all
     exit
 EOF

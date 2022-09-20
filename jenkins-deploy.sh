@@ -24,14 +24,14 @@ git checkout $branch
 if [[ $serverType == "node" ]]
 then
     cp -r ../$envFile ./.env
-    cd ../
     if [[ $typescript == True ]]
     then
         yarn install
         yarn build
         cp .env build/
-        rm -r -f node_modules
+        rm -rf -f node_modules
     fi
+    cd ../
     zip -r $projectName.zip $projectName/ -x "$projectName/.git/*"
     scp -r $projectName.zip $host:~/temp
 
@@ -46,7 +46,7 @@ elif [[ $serverType == 'react' ]]
 then
     cp -r ../$envFile ./.env
     yarn install
-    rm -r build
+    rm -rf build
     yarn build
     zip -r build.zip build
     scp -r build.zip $host:~/temp

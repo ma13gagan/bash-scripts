@@ -159,14 +159,14 @@ EOF
 
 sudo certbot --nginx -d $hostName --agree-tos --register-unsafely-without-email
 
-if [[ serverType == "node" ]]
+if [[ $serverType == "node" ]]
 then
     echo "$rpServerFile" > /tmp/$hostName
 else
     echo "$staticServerFile" > /tmp/$hostName
 fi
 
-sudo mv -r /tmp/$hostName /etc/nginx/sites-available/
+sudo mv /tmp/$hostName /etc/nginx/sites-available/
 sudo ln -s /etc/nginx/sites-available/$hostName /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl restart nginx

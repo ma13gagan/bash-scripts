@@ -11,7 +11,7 @@ curl -o script.sh https://raw.githubusercontent.com/ma13gagan/bash-scripts/main/
 Script usage
 
 ```sh
-sudo ./script.sh -p <project name> -k <public key> -h <host name> -d
+sudo ./script.sh -p <project name> -h <host name> -s node/react -d
 ```
 
 > -d is the optional flag for installing docker

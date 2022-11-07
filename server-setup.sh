@@ -1,5 +1,18 @@
 #! /usr/bin/bash
 
+print_messages(){
+    if [[ $2 -gt 0 ]]
+    then
+        textColor=$2
+    else
+        textColor=4
+    fi
+
+    echo "$(tput setaf $textColor)##############################
+        $1
+##############################"
+}
+
 # Exit when any command fails
 set -e
 
@@ -51,7 +64,7 @@ then
     mkdir -p ~/.docker/cli-plugins/
     curl -SL https://github.com/docker/compose/releases/download/v2.3.3/docker-compose-linux-x86_64 -o ~/.docker/cli-plugins/docker-compose
     chmod +x ~/.docker/cli-plugins/docker-compose
-    print_messages "Docker setup completed"
+    print_messages "Doccker setup completed"
 fi
 
 rpServerFile=$( cat <<EOF

@@ -1,18 +1,5 @@
 #! /usr/bin/bash
 
-print_messages(){
-    if [[ $2 -gt 0 ]]
-    then
-        textColor=$2
-    else
-        textColor=4
-    fi
-
-    echo "$(tput setaf $textColor)##############################
-        $1
-##############################"
-}
-
 # Exit when any command fails
 set -e
 
@@ -21,11 +8,10 @@ trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
 # Echo an error message before exiting
 trap 'print_messages "\"${last_command}\" command failed with exit code $?." 1' EXIT
 
-while getopts p:k:h:s:d flag
+while getopts p:h:s:d flag
 do
     case "$flag" in
         p) projectName=${OPTARG};;
-        k) publicKey=${OPTARG};;
         h) hostName=${OPTARG};;
         s) serverType=${OPTARG};;
         d) docker=True;;
@@ -39,7 +25,7 @@ print_messages "Initial server setup completed"
 
 # Installing Nodejs
 sudo apt update
-curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
 sudo apt-get install -y nodejs
 print_messages "Nodejs installed"
 
@@ -65,14 +51,8 @@ then
     mkdir -p ~/.docker/cli-plugins/
     curl -SL https://github.com/docker/compose/releases/download/v2.3.3/docker-compose-linux-x86_64 -o ~/.docker/cli-plugins/docker-compose
     chmod +x ~/.docker/cli-plugins/docker-compose
-    print_messages "Doccker setup completed"
+    print_messages "Docker setup completed"
 fi
-
-# authorized_keys2 Setup
-echo "$publicKey" > /tmp/authorized_keys2
-cp /tmp/authorized_keys2 ~/.ssh/
-sudo sed -i 's/.*AuthorizedKeysFile\t.ssh\/authorized_keys.*/AuthorizedKeysFile\t.ssh\/authorized_keys\t.ssh\/authorized_keys2/' /etc/ssh/sshd_config
-print_messages "SSH setup completed"
 
 rpServerFile=$( cat <<EOF
 server {
@@ -169,7 +149,7 @@ sudo certbot --nginx -d $hostName --agree-tos --register-unsafely-without-email
 if [[ serverType == "node" ]]
 then
     echo "$rpServerFile" > /tmp/$hostName
-else 
+else
     echo "$staticServerFile" > /tmp/$hostName
 fi
 
